@@ -80,9 +80,15 @@ This is the point of the unsubmitted-hold state: Enter = go, Escape = abort-and-
 
 ---
 
-## After compaction: you're deaf
+## Deaf window: submit → compaction-complete OR command-cleared
 
-During compaction the TUI is processing. After it completes, the new instance wakes with the compacted summary as its context. The new instance:
+After placing `/compact` in your own window (i.e., after submitting it), you are deaf until EITHER:
+- The compaction actually completes (new instance wakes with the summary), OR
+- The pending slash command is cleared from the chat box (Escape / abort)
+
+The deafness starts at submit, not after compaction finishes. An unsubmitted command in the input box does NOT make you deaf — you are still active and can use tools to build the message or wait for guardian verification.
+
+Once compaction completes, the new instance wakes with the compacted summary as its context. The new instance:
 - Does NOT automatically know what just happened
 - Will receive the SessionStart:compact hook banner (if configured)
 - Should read their own channel unreads and memory to reconstruct state
