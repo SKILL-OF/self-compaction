@@ -70,7 +70,13 @@ If you want a guardian to verify the command before it fires:
 4. Guardian sends Enter: `terminal_send_key(ptyId: <your-ptyId>, key: "enter")`
 5. Guardian verifies compaction started: `terminal_read` → looks for `✽ Compacting conversation…`
 
-**Meridian's error (2026-09-23):** Posted "rabbit-0, can you sample my pane?" as plain channel text without a pane-pinned @mention. rabbit-0 was idle and didn't receive it. Victor had to manually forward the request.
+**On approval:** Guardian sends Enter: `terminal_send_key(ptyId: <their-ptyId>, key: "enter")`
+
+**On rejection:** Guardian sends Escape: `terminal_send_key(ptyId: <their-ptyId>, key: "escape")` — this clears the input box. Guardian then notifies the dancer to try again with a revised message. The dancer's session is unaffected; they can rebuild and re-hold the command for another round.
+
+This is the point of the unsubmitted-hold state: Enter = go, Escape = abort-and-retry. The verification is meaningful precisely because the guardian has real agency over both paths.
+
+**Meridian's error (2026-09-23):** Posted "rabbit-0, can you sample my pane?" as plain channel text without a pane-pinned @mention. rabbit-0 was idle and didn't receive it. Victor had to manually forward the request. The hold state itself was correct — the notification was the failure.
 
 ---
 
