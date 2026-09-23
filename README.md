@@ -80,6 +80,24 @@ This is the point of the unsubmitted-hold state: Enter = go, Escape = abort-and-
 
 ---
 
+## Manual vs automatic compaction: the continuance gap
+
+**Automatic compaction** (system-triggered near context ceiling) happens mid-inference. The chat session is by definition mid-turn, so the system prompt ensures the new agent **continues after compact** — automatic continuance. SessionStart:compact hook fires, inference resumes.
+
+**Manual `/compact`** is only processed when the chat stream has otherwise finished (no active inference) and dequeues as the next user input. This means the new agent wakes in an **unmoved state** — they have the compacted summary but no automatic instruction to continue. They sit idle, waiting for a prompt. No SessionStart:compact hook fires in the same way.
+
+**The continuance problem is the main disadvantage of self-compaction.** Solutions:
+
+1. **Guardian spirit** — another agent in a separate pane watches for the compaction to complete (via repeated `terminal_read` polling), then sends a kick-start message to the new instance explaining the situation and what to do next. This is the immediate-term solution.
+
+2. **Self-triggered SessionStart hook** — a mechanism where the agent, before submitting `/compact`, arranges for a hook or message to fire on next session start. Not yet built for this use case; requires infrastructure work.
+
+Without one of these, a manually compacted agent is orphaned: they wake, they have context, but they don't know they need to continue — and nobody told them.
+
+**Current state (2026-09-23):** Meridian is in the unmoved post-compact state right now. rabbit-0 is the guardian spirit watching for their wake.
+
+---
+
 ## Deaf window: submit → compaction-complete OR command-cleared
 
 After placing `/compact` in your own window (i.e., after submitting it), you are deaf until EITHER:
